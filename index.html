@@ -154,6 +154,7 @@ label.f{display:block;font-size:13px;color:var(--muted);margin:10px 0 4px}
     </div>
   </div>
   <div class="ver">Ritual v<span id="appVer"></span> · <a href="#" id="checkUpd" style="color:inherit">buscar actualización</a></div>
+  <div class="ver" style="margin-top:6px">Se cuentan visitas e instalaciones de forma anónima, sin cookies ni datos personales.</div>
 </div>
 
 <div class="sheet" id="sheet">
@@ -485,6 +486,18 @@ setInterval(rollover,60000);
 
 render();
 bkCheck();
+
+// ---- Conteo anónimo de visitas e instalaciones (GoatCounter: sin cookies ni datos personales) ----
+// No se carga en localhost ni sin internet; si falla, la app sigue igual.
+if(/^https?:$/.test(location.protocol)&&!['localhost','127.0.0.1','[::1]'].includes(location.hostname)){
+  const gc=document.createElement('script');
+  gc.async=true;gc.src='//gc.zgo.at/count.js';
+  gc.dataset.goatcounter='https://flowerssblue.goatcounter.com/count';
+  document.head.appendChild(gc);
+  window.addEventListener('appinstalled',()=>{
+    try{window.goatcounter&&window.goatcounter.count({path:'evento/app-instalada',title:'App instalada',event:true})}catch(e){}
+  });
+}
 
 // ---- Actualizaciones (estilo OTA) ----
 const APP_VERSION='1.0.0';
