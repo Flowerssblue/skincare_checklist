@@ -549,7 +549,7 @@ if(/^https?:$/.test(location.protocol)&&!['localhost','127.0.0.1','[::1]'].inclu
 }
 
 // ---- Actualizaciones (estilo OTA) ----
-const APP_VERSION='1.1.1';
+const APP_VERSION='1.1.2';
 $('appVer').textContent=APP_VERSION;
 if('serviceWorker' in navigator&&location.protocol.startsWith('http')){
   let updating=false;
@@ -561,7 +561,15 @@ if('serviceWorker' in navigator&&location.protocol.startsWith('http')){
       if(w.state==='installed'&&navigator.serviceWorker.controller)offer(w)})});
     const check=()=>reg.update().catch(()=>{});
     document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')check()});
-    $('checkUpd').onclick=e=>{e.preventDefault();check().then(()=>setTimeout(()=>{if(!$('updateBar').classList.contains('show'))toast('Ya tienes la última versión')},1500))};
+    // la versión nueva tarda en descargarse: espera a que termine de instalarse antes de decir "ya tienes la última"
+    $('checkUpd').onclick=async e=>{
+      e.preventDefault();toast('Buscando actualización…');
+      await check();
+      const w=reg.installing;
+      if(w&&w.state!=='installed')await new Promise(ok=>{w.addEventListener('statechange',()=>{if(w.state==='installed'||w.state==='redundant')ok()});setTimeout(ok,20000)});
+      await new Promise(ok=>setTimeout(ok,300));
+      if(!$('updateBar').classList.contains('show'))toast('Ya tienes la última versión');
+    };
   }).catch(()=>{});
 }else{$('checkUpd').style.display='none'}
 </script>

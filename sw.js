@@ -1,11 +1,12 @@
 // Ritual — service worker
 // Para publicar una actualización: cambia VERSION (y la misma en index.html) y haz push.
-const VERSION = '1.1.1';
+const VERSION = '1.1.2';
 const CACHE = 'ritual-' + VERSION;
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './icon-maskable.png', './apple-touch-icon.png'];
 
 self.addEventListener('install', e => {
-  e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)));
+  // cache:'reload' salta la caché HTTP de GitHub Pages (10 min); si no, la versión nueva podía guardar el index.html viejo
+  e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL.map(u => new Request(u, { cache: 'reload' })))));
   // No activamos sola: esperamos a que la usuaria toque "Actualizar".
 });
 
