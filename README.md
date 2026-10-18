@@ -2,6 +2,17 @@
 
 App personal para seguir la rutina de skincare de mañana y de noche. Se instala en el celular desde el navegador y funciona sin internet.
 
+## Abrir e instalar la app
+
+**Enlace directo: https://flowerssblue.github.io/skincare_checklist/**
+
+No hay un archivo que descargar: es una web instalable (PWA).
+
+- **Android (Chrome):** abre el enlace → menú ⋮ → **Agregar a la pantalla de inicio** (o **Instalar app**).
+- **iPhone (Safari):** abre el enlace → botón Compartir → **Agregar a pantalla de inicio**.
+
+Una vez instalada funciona sin internet y se actualiza sola cuando hay una versión nueva.
+
 ## Publicar una actualización
 
 1. Hacer los cambios en `index.html`.
