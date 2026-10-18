@@ -533,7 +533,7 @@ if(/^https?:$/.test(location.protocol)&&!['localhost','127.0.0.1','[::1]'].inclu
 }
 
 // ---- Actualizaciones (estilo OTA) ----
-const APP_VERSION='1.0.0';
+const APP_VERSION='1.1.0';
 $('appVer').textContent=APP_VERSION;
 if('serviceWorker' in navigator&&location.protocol.startsWith('http')){
   let updating=false;

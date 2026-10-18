@@ -19,7 +19,7 @@ App personal de Florencia para seguir su rutina de skincare de mañana y de noch
 | `icon-192.png`, `icon-512.png`, `icon-maskable.png`, `apple-touch-icon.png` | Íconos (sol naranjo + luna morada) |
 | `README.md` | Instrucciones cortas para publicar una actualización |
 
-## Funciones actuales (v1.0.0)
+## Funciones actuales (v1.1.0)
 
 - **Extras** (tercera pestaña): tratamientos de uso ocasional en `S.tx` (`kind`: `semanal` con días, o `focalizado`). No cuentan para racha ni progreso; muestran "último uso" a partir de `S.log[fecha].tx`.
 - **Respaldo**: la sección Respaldo muestra la fecha del último (`S.lastBackup`); se guarda también `S.createdAt`. Pide `navigator.storage.persist()`.

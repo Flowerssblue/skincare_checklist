@@ -1,6 +1,6 @@
 // Ritual — service worker
 // Para publicar una actualización: cambia VERSION (y la misma en index.html) y haz push.
-const VERSION = '1.0.0';
+const VERSION = '1.1.0';
 const CACHE = 'ritual-' + VERSION;
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './icon-maskable.png', './apple-touch-icon.png'];
 
