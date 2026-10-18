@@ -6,7 +6,7 @@ App personal de Florencia para seguir su rutina de skincare de mañana y de noch
 
 - **Un solo archivo**: `index.html` con HTML, CSS y JS inline. Sin framework, sin build, sin dependencias npm. Mantenerlo así salvo que Florencia pida lo contrario.
 - **PWA** instalable: `manifest.webmanifest` + íconos PNG + `sw.js` (service worker).
-- **Hosting previsto**: GitHub Pages en `https://flowerssblue.github.io/ritual/` (repo público `Flowerssblue/ritual`, rama `main`, raíz `/`).
+- **Hosting previsto**: GitHub Pages en `https://flowerssblue.github.io/skincare_checklist/` (repo público `Flowerssblue/skincare_checklist`, rama `main`, raíz `/`).
 - **Datos**: todo en `localStorage` del navegador, clave `ritual-skincare-v3`. No hay backend ni cuentas. Las fotos se guardan como data URL JPEG reducidas a ~200 px.
 
 ## Archivos
@@ -51,13 +51,8 @@ Esto ya se probó localmente: publicar 1.0.0 → cambiar a 1.0.1 → apareció e
 
 ## Pendiente
 
-1. **Florencia crea el repo** `Flowerssblue/ritual` en GitHub (público, vacío, sin README).
-2. Conectar y subir:
-   ```
-   git remote add origin https://github.com/Flowerssblue/ritual.git
-   git push -u origin main
-   ```
-3. Activar Pages: Settings → Pages → Deploy from a branch → `main` / `(root)`.
+Ya hecho: repo `Flowerssblue/skincare_checklist` (antes `ritual`), Pages activado desde `main` / raíz.
+
 4. En el celular: abrir el link en Chrome → menú ⋮ → **Agregar a la pantalla de inicio**.
 5. **Pasar los datos**: si ya usó la versión de archivo suelto (`skincare-ritual.html`), allí tocar **Descargar respaldo** y en la versión publicada **Cargar respaldo**. Los datos del navegador están atados a la dirección de la página y no se mueven solos.
 
