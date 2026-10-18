@@ -158,6 +158,11 @@ label.f{display:block;font-size:13px;color:var(--muted);margin:10px 0 4px}
       <input type="file" id="fPhoto" accept="image/*" hidden>
     </div>
     <div class="chips" id="ocrChips"></div>
+    <div id="slotWrap">
+      <label class="f">¿A qué paso va?</label>
+      <select id="fSlot"></select>
+    </div>
+    <div id="stepWrap">
     <label class="f">Paso</label>
     <select id="fStep">
       <option>Desmaquillante</option><option>Limpiador</option><option>Tónico</option>
@@ -165,6 +170,7 @@ label.f{display:block;font-size:13px;color:var(--muted);margin:10px 0 4px}
       <option>Contorno de ojos</option><option>Hidratante</option><option>Aceite</option>
       <option>Protector solar</option><option>Bálsamo labial</option><option>Otro</option>
     </select>
+    </div>
     <label class="f">Nombre del producto</label>
     <input id="fName" placeholder="Ej: The Ordinary Niacinamida">
     <label class="f">Nota (opcional)</label>
@@ -284,11 +290,21 @@ function openSheet(p){
   if(![...$('fStep').options].some(o=>o.value===st))$('fStep').add(new Option(st));
   $('fStep').value=st;$('fName').value=p?p.name:'';$('fNote').value=p?p.note:'';
   selDays=p&&p.days?[...p.days]:[];drawDays();
+  fillSlots(p);
   $('fDelete').style.display=p?'inline-block':'none';
   $('fSaveMore').style.display=p?'none':'inline-block';
   $('ocrChips').innerHTML='';ocrMsg('Toma una foto de la etiqueta y leo el nombre por ti.');
   showPhoto();$('sheet').classList.add('open');$('sheet').querySelector('.box').scrollTop=0;
 }
+// Al agregar: se puede asignar el producto a un paso que aún no tiene producto.
+function fillSlots(p){
+  const empty=p?[]:S[mode].filter(x=>!x.name);
+  $('slotWrap').style.display=empty.length?'block':'none';
+  $('fSlot').innerHTML='<option value="">Paso nuevo</option>'+empty.map(x=>`<option value="${x.id}">${esc(x.step)}</option>`).join('');
+  syncSlot();
+}
+function syncSlot(){$('stepWrap').style.display=$('fSlot').value?'none':'block'}
+$('fSlot').onchange=syncSlot;
 function showPhoto(){$('fPrev').src=photoData||'';$('fPrev').style.display=photoData?'block':'none';$('fPhotoDel').style.display=photoData?'inline-block':'none';$('fPhotoBtn').textContent=photoData?'📷 Cambiar foto':'📷 Foto del producto'}
 function ocrMsg(t){$('ocrStatus').textContent=t}
 
@@ -330,7 +346,8 @@ async function readLabel(img){
     const big=[...lines].sort((a,b)=>b.h-a.h).slice(0,8);
     if(!$('fName').value.trim()){$('fName').value=big.slice(0,2).map(l=>l.t).join(' ')}
     if(!editing){const st=guessStep(lines.map(l=>l.t).join(' '));if(st){
-      if(![...$('fStep').options].some(o=>o.value===st))$('fStep').add(new Option(st));$('fStep').value=st}}
+      if(![...$('fStep').options].some(o=>o.value===st))$('fStep').add(new Option(st));$('fStep').value=st;
+      const slot=S[mode].find(x=>!x.name&&x.step===st);if(slot){$('fSlot').value=slot.id;syncSlot()}}}
     $('ocrChips').innerHTML='<div class="lbl">Toca un texto para sumarlo al nombre:</div>'+
       big.map(l=>`<button type="button" class="chip">${esc(l.t)}</button>`).join('')+
       '<button type="button" class="chip" data-clear="1">✕ borrar nombre</button>';
@@ -358,7 +375,9 @@ $('fPhoto').onchange=e=>{
 };
 function saveProduct(){
   const d={step:$('fStep').value,name:$('fName').value.trim(),note:$('fNote').value.trim(),photo:photoData,days:[...selDays].sort()};
-  if(editing)Object.assign(editing,d);else S[mode].push({id:uid(),...d});
+  const slot=!editing&&$('fSlot').value&&S[mode].find(x=>x.id===$('fSlot').value);
+  if(slot){d.step=slot.step;if(!d.days.length)d.days=slot.days||[];Object.assign(slot,d)}
+  else if(editing)Object.assign(editing,d);else S[mode].push({id:uid(),...d});
   save();render();
 }
 $('fSave').onclick=()=>{saveProduct();$('sheet').classList.remove('open')};
