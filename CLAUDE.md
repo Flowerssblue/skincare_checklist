@@ -21,6 +21,10 @@ App personal de Florencia para seguir su rutina de skincare de mañana y de noch
 
 ## Funciones actuales (v1.0.0)
 
+- **Extras** (tercera pestaña): tratamientos de uso ocasional en `S.tx` (`kind`: `semanal` con días, o `focalizado`). No cuentan para racha ni progreso; muestran "último uso" a partir de `S.log[fecha].tx`.
+- **Aviso de respaldo**: banner si pasan 30 días (`BACKUP_DAYS`) sin descargar respaldo; guarda `S.lastBackup`, `S.createdAt` y `S.bkSnooze`. Pide `navigator.storage.persist()`.
+- **Tono por pestaña**: `html.pm` y `html.tx` cambian fondo y acento. Si la app queda abierta pasada la medianoche, `rollover()` empieza el día nuevo.
+- Al agregar un producto se puede asignar a un paso vacío (`fSlot`) o crear uno nuevo.
 - Pestañas **Mañana** y **Noche**; abre en Noche desde las 15:00.
 - Checklist diario por paso, barra de avance, racha de días seguidos y vista de los últimos 7 días (punto naranjo = AM completa, morado = PM completa).
 - Rutina base precargada según la guía de Dermotienda:

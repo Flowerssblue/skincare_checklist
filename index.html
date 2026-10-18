@@ -16,9 +16,14 @@
   --am:#e9a86b; --am-soft:#fbeadb; --pm:#7b6fb0; --pm-soft:#e9e5f6;
   --ok:#6a9c7a; --danger:#c0605a; --accent:var(--am); --accent-soft:var(--am-soft);
 }
-body.pm{--accent:var(--pm); --accent-soft:var(--pm-soft)}
+:root{--tx:#5f9a8c; --tx-soft:#dcece7}
+/* cada pestaña tiene su propio tono de fondo: mañana cálido, noche lavanda, extras verde salvia */
+html.pm{--accent:var(--pm); --accent-soft:var(--pm-soft); --bg:#f1eef7; --card:#fbf9fe; --line:#e2ddee}
+html.tx{--accent:var(--tx); --accent-soft:var(--tx-soft); --bg:#edf3f0; --card:#f9fcfa; --line:#dce8e2}
 @media (prefers-color-scheme: dark){
-  :root{--bg:#1f1a19; --card:#2a2422; --ink:#f1e8e3; --muted:#a8988f; --line:#3a322f; --am-soft:#3d2f22; --pm-soft:#2e2a40}
+  :root{--bg:#1f1a19; --card:#2a2422; --ink:#f1e8e3; --muted:#a8988f; --line:#3a322f; --am-soft:#3d2f22; --pm-soft:#2e2a40; --tx-soft:#22332f}
+  html.pm{--bg:#1a1824; --card:#24212f; --line:#34304a}
+  html.tx{--bg:#171e1c; --card:#212a27; --line:#2f3b37}
 }
 *{box-sizing:border-box}
 html,body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,"Segoe UI",Roboto,system-ui,sans-serif;-webkit-tap-highlight-color:transparent}
@@ -26,8 +31,8 @@ html,body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-syst
 header{display:flex;align-items:baseline;justify-content:space-between;margin:6px 0 14px}
 h1{font-family:Georgia,"Times New Roman",serif;font-weight:400;font-size:30px;margin:0;letter-spacing:.5px}
 .date{color:var(--muted);font-size:14px;text-transform:capitalize}
-.tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:5px;margin-bottom:16px}
-.tabs button{border:0;background:transparent;color:var(--muted);font-size:16px;padding:11px;border-radius:12px;font-weight:600}
+.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:5px;margin-bottom:16px}
+.tabs button{border:0;background:transparent;color:var(--muted);font-size:15px;padding:11px 4px;border-radius:12px;font-weight:600}
 .tabs button.on{background:var(--accent);color:#fff}
 .progress{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;margin-bottom:14px}
 .prow{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
@@ -90,6 +95,13 @@ label.f{display:block;font-size:13px;color:var(--muted);margin:10px 0 4px}
 .dots{display:flex;justify-content:center;gap:3px;margin-top:4px}
 .dot{width:9px;height:9px;border-radius:50%;background:var(--line)}
 .dot.am{background:var(--am)} .dot.pm{background:var(--pm)}
+.intro{color:var(--muted);font-size:13px;line-height:1.45;margin:0 2px 12px;display:none}
+.bk{display:none;align-items:center;gap:8px;flex-wrap:wrap;background:var(--card);border:1px solid var(--accent);border-radius:14px;padding:10px 12px;margin-bottom:14px;font-size:13px}
+.bk.show{display:flex}
+.bk span{flex:1;min-width:160px}
+.bk button{border:0;border-radius:10px;padding:8px 12px;font-size:13px;font-weight:700;background:var(--accent);color:#fff}
+.bk button.later{background:transparent;color:var(--muted);font-weight:600}
+.tag{display:inline-block;background:var(--accent-soft);color:var(--accent);border-radius:99px;padding:1px 8px;font-size:11px;font-weight:700;font-style:normal;margin-left:4px}
 </style>
 </head>
 <body>
@@ -102,9 +114,18 @@ label.f{display:block;font-size:13px;color:var(--muted);margin:10px 0 4px}
   <div class="tabs">
     <button id="tab-am" class="on">☀️ Mañana</button>
     <button id="tab-pm">🌙 Noche</button>
+    <button id="tab-tx">✨ Extras</button>
   </div>
 
-  <div class="progress">
+  <div class="bk" id="bkBanner">
+    <span id="bkText"></span>
+    <button id="bkNow">Descargar</button>
+    <button id="bkLater" class="later">Luego</button>
+  </div>
+
+  <p class="intro" id="txIntro"><b>Tratamientos</b> de uso ocasional: mascarillas, exfoliantes, parches. Toca uno para marcar que lo usaste hoy; te digo hace cuánto fue la última vez. No cuentan para la racha.</p>
+
+  <div class="progress" id="progressCard">
     <div class="prow"><b id="ptitle">Rutina de mañana</b><span id="pcount">0/0</span></div>
     <div class="bar"><i id="pbar"></i></div>
     <div class="done-msg" id="donemsg">✓ Rutina completa por hoy</div>
@@ -124,7 +145,7 @@ label.f{display:block;font-size:13px;color:var(--muted);margin:10px 0 4px}
     <div class="week" id="week"></div>
   </div>
 
-  <div class="section">
+  <div class="section" id="remSection">
     <h2>Recordatorio</h2>
     <div class="row">
       <input type="time" id="remTime">
@@ -135,7 +156,8 @@ label.f{display:block;font-size:13px;color:var(--muted);margin:10px 0 4px}
 
   <div class="section">
     <h2>Respaldo</h2>
-    <p>Todo se guarda en este navegador. Si borras los datos del navegador o cambias de celular, se pierde, así que descarga un respaldo de vez en cuando.</p>
+    <p>Todo se guarda en este navegador. Si borras los datos del navegador o cambias de celular, se pierde, así que descarga un respaldo de vez en cuando. Te aviso si pasa más de un mes.</p>
+    <p id="bkInfo"></p>
     <div class="row">
       <button class="btn" id="export">Descargar respaldo</button>
       <button class="btn" id="importBtn">Cargar respaldo</button>
@@ -164,19 +186,23 @@ label.f{display:block;font-size:13px;color:var(--muted);margin:10px 0 4px}
     </div>
     <div id="stepWrap">
     <label class="f">Paso</label>
-    <select id="fStep">
-      <option>Desmaquillante</option><option>Limpiador</option><option>Tónico</option>
-      <option>Esencia</option><option>Sérum</option><option>Tratamiento</option>
-      <option>Contorno de ojos</option><option>Hidratante</option><option>Aceite</option>
-      <option>Protector solar</option><option>Bálsamo labial</option><option>Otro</option>
-    </select>
+    <select id="fStep"></select>
+    </div>
+    <div id="kindWrap">
+      <label class="f">Tipo</label>
+      <select id="fKind">
+        <option value="semanal">Semanal (días fijos)</option>
+        <option value="focalizado">Focalizado (cuando lo necesito)</option>
+      </select>
     </div>
     <label class="f">Nombre del producto</label>
     <input id="fName" placeholder="Ej: The Ordinary Niacinamida">
     <label class="f">Nota (opcional)</label>
     <input id="fNote" placeholder="Ej: 2–3 gotas, esperar 1 min">
-    <label class="f">Días (si no marcas ninguno, va todos los días)</label>
-    <div class="row" id="fDays"></div>
+    <div id="daysWrap">
+      <label class="f" id="fDaysLbl">Días (si no marcas ninguno, va todos los días)</label>
+      <div class="row" id="fDays"></div>
+    </div>
     <div class="actions">
       <button class="btn primary" id="fSave">Guardar</button>
       <button class="btn" id="fSaveMore">Guardar y agregar otro</button>
@@ -199,8 +225,10 @@ const DAYN=['Do','Lu','Ma','Mi','Ju','Vi','Sá'];
 const defaults={
   am:[P('Limpiador','Gel o espuma suave'),P('Sérum de vitamina C','Antioxidante: ilumina y protege'),P('Hidratante','Crema ligera'),P('Protector solar','FPS 50+. Reaplicar cada 2–3 horas')],
   pm:[P('Aceite limpiador','Doble limpieza, paso 1: retira maquillaje'),P('Limpiador en gel','Doble limpieza, paso 2'),P('Retinol / ácidos','Solo 2–3 noches por semana, introducir de a poco',[1,3,5]),P('Hidratante / reparador','Crema reparadora o bálsamo')],
-  log:{}, reminders:{am:'',pm:''}
+  tx:[], log:{}, reminders:{am:'',pm:''}
 };
+const STEPS=['Desmaquillante','Limpiador','Tónico','Esencia','Sérum','Tratamiento','Contorno de ojos','Hidratante','Aceite','Protector solar','Bálsamo labial','Otro'];
+const TX_STEPS=['Mascarilla','Exfoliante','Parches','Tratamiento de acné','Mascarilla de ojos','Otro'];
 // pasos que tocan un día dado (days vacío = todos los días)
 const forDay=(m,d=new Date())=>S[m].filter(p=>!p.days||!p.days.length||p.days.includes(d.getDay()));
 const keyToDate=k=>{const[a,b,c]=k.split('-').map(Number);return new Date(a,b-1,c)};
@@ -208,7 +236,7 @@ const keyToDate=k=>{const[a,b,c]=k.split('-').map(Number);return new Date(a,b-1,
 let S;
 try{S=JSON.parse(localStorage.getItem(KEY))||null}catch(e){S=null}
 if(!S) S=JSON.parse(JSON.stringify(defaults));
-S.log=S.log||{}; S.reminders=S.reminders||{am:'',pm:''};
+S.log=S.log||{}; S.reminders=S.reminders||{am:'',pm:''}; S.tx=S.tx||[];
 
 function save(){
   try{localStorage.setItem(KEY,JSON.stringify(S))}
@@ -221,16 +249,30 @@ const $=id=>document.getElementById(id);
 function toast(t){const el=$('toast');el.textContent=t;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2000)}
 function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
 
-function dayLog(k=todayKey()){S.log[k]=S.log[k]||{am:[],pm:[]};return S.log[k]}
+function dayLog(k=todayKey()){const l=S.log[k]=S.log[k]||{am:[],pm:[]};l.tx=l.tx||[];return l}
+// último día en que se usó un tratamiento (null si nunca)
+function lastUse(id){let best=null;for(const k in S.log){const l=S.log[k];if(l.tx&&l.tx.includes(id)&&(!best||k>best))best=k}return best}
+function useText(id){
+  const k=lastUse(id);if(!k)return 'Aún sin usar';
+  const n=Math.round((keyToDate(todayKey())-keyToDate(k))/864e5);
+  return n<=0?'Usado hoy':n===1?'Último uso: ayer':'Último uso: hace '+n+' días';
+}
 function isComplete(k,m){const l=S.log[k];const list=forDay(m,keyToDate(k));return !!(l&&list.length&&list.every(p=>l[m].includes(p.id)))}
 
 function render(){
-  document.body.classList.toggle('pm',mode==='pm');
-  $('tab-am').classList.toggle('on',mode==='am');$('tab-pm').classList.toggle('on',mode==='pm');
+  const isTx=mode==='tx';
+  document.documentElement.classList.toggle('pm',mode==='pm');
+  document.documentElement.classList.toggle('tx',isTx);
+  document.querySelector('meta[name=theme-color]').content=getComputedStyle(document.documentElement).getPropertyValue('--bg').trim();
+  $('tab-am').classList.toggle('on',mode==='am');$('tab-pm').classList.toggle('on',mode==='pm');$('tab-tx').classList.toggle('on',isTx);
+  $('progressCard').style.display=isTx?'none':'';
+  $('remSection').style.display=isTx?'none':'';
+  $('txIntro').style.display=isTx?'block':'none';
+  $('add').textContent=isTx?'+ Agregar tratamiento':'+ Agregar producto';
   $('today').textContent=new Date().toLocaleDateString('es-CL',{weekday:'long',day:'numeric',month:'long'});
   $('ptitle').textContent=mode==='am'?'Rutina de mañana':'Rutina de noche';
   const editingOn=document.body.classList.contains('editing');
-  const today=forDay(mode), list=editingOn?S[mode]:today, done=dayLog()[mode];
+  const today=isTx?S.tx:forDay(mode), list=editingOn?S[mode]:today, done=dayLog()[mode];
   const n=today.filter(p=>done.includes(p.id)).length;
   $('pcount').textContent=n+'/'+today.length;
   $('pbar').style.width=today.length?(n/today.length*100)+'%':'0';
@@ -238,21 +280,26 @@ function render(){
   const skipped=S[mode].length-today.length;
   // streak
   let s=0,d=new Date();
-  if(!isComplete(todayKey(d),mode)) d.setDate(d.getDate()-1);
-  while(isComplete(todayKey(d),mode)){s++;d.setDate(d.getDate()-1)}
+  if(!isTx){
+    if(!isComplete(todayKey(d),mode)) d.setDate(d.getDate()-1);
+    while(isComplete(todayKey(d),mode)){s++;d.setDate(d.getDate()-1)}
+  }
   $('streak').textContent=s?`🔥 ${s} ${s===1?'día seguido':'días seguidos'}`:'';
   // list
   const L=$('list');
-  if(!list.length){L.innerHTML='<div class="empty">Aún no hay productos. Agrega el primero en el orden en que lo aplicas.</div>'}
+  if(!list.length){L.innerHTML=isTx?'<div class="empty">Aún no hay tratamientos. Agrega una mascarilla, un exfoliante o unos parches.</div>':'<div class="empty">Aún no hay productos. Agrega el primero en el orden en que lo aplicas.</div>'}
   else L.innerHTML=list.map((p,i)=>{
     const c=done.includes(p.id);
-    const img=p.photo?`<img class="thumb" src="${p.photo}" alt="">`:`<div class="thumb">${mode==='am'?'☀':'☾'}</div>`;
+    const img=p.photo?`<img class="thumb" src="${p.photo}" alt="">`:`<div class="thumb">${isTx?'✦':mode==='am'?'☀':'☾'}</div>`;
+    const dueToday=isTx&&p.kind!=='focalizado'&&p.days&&p.days.includes(new Date().getDay());
+    const stepLine=isTx?`${esc(p.step)} · ${p.kind==='focalizado'?'Focalizado':'Semanal'}${dueToday&&!c?'<span class="tag">toca hoy</span>':''}`:(p.name?esc(p.step):'Sin producto asignado');
     return `<div class="item ${c?'checked':''}" data-id="${p.id}">
       <div class="num">${i+1}</div>${img}
       <div class="info"><div class="name">${esc(p.name||p.step)}</div>
-        <div class="step">${p.name?esc(p.step):'Sin producto asignado'}</div>
+        <div class="step">${stepLine}</div>
         ${p.note?`<div class="note">${esc(p.note)}</div>`:''}
-        ${p.days&&p.days.length?`<div class="note">📅 ${p.days.map(d=>DAYN[d]).join(' · ')}</div>`:''}</div>
+        ${p.days&&p.days.length?`<div class="note">📅 ${p.days.map(d=>DAYN[d]).join(' · ')}</div>`:''}
+        ${isTx?`<div class="note">${useText(p.id)}</div>`:''}</div>
       <button class="check" data-act="check" aria-label="Marcar">${c?'✓':''}</button>
       <div class="edit-btns">
         <button class="ib" data-act="up" aria-label="Subir">↑</button>
@@ -269,6 +316,7 @@ function render(){
 
 $('tab-am').onclick=()=>{mode='am';render()};
 $('tab-pm').onclick=()=>{mode='pm';render()};
+$('tab-tx').onclick=()=>{mode='tx';render()};
 $('toggleEdit').onclick=()=>{document.body.classList.toggle('editing');$('toggleEdit').textContent=document.body.classList.contains('editing')?'Listo':'Ordenar / editar';render()};
 $('reset').onclick=()=>{dayLog()[mode]=[];save();render()};
 
@@ -277,7 +325,7 @@ $('list').onclick=e=>{
   const id=it.dataset.id, list=S[mode], i=list.findIndex(p=>p.id===id);
   const act=b?b.dataset.act:(document.body.classList.contains('editing')?null:'check');
   if(act==='check'){const d=dayLog()[mode];const k=d.indexOf(id);k>=0?d.splice(k,1):d.push(id);
-    save();render();if(isComplete(todayKey(),mode)&&k<0)toast('¡Rutina lista! ✨')}
+    save();render();if(mode!=='tx'&&isComplete(todayKey(),mode)&&k<0)toast('¡Rutina lista! ✨')}
   else if(act==='up'&&i>0){[list[i-1],list[i]]=[list[i],list[i-1]];save();render()}
   else if(act==='down'&&i<list.length-1){[list[i+1],list[i]]=[list[i],list[i+1]];save();render()}
   else if(act==='edit'){openSheet(list[i])}
@@ -285,10 +333,13 @@ $('list').onclick=e=>{
 
 function openSheet(p){
   editing=p||null;photoData=p?p.photo:'';
-  $('sheetTitle').textContent=p?'Editar producto':'Agregar producto';
-  const st=p?p.step:'Limpiador';
+  const isTx=mode==='tx';
+  $('sheetTitle').textContent=(p?'Editar ':'Agregar ')+(isTx?'tratamiento':'producto');
+  const st=p?p.step:(isTx?'Mascarilla':'Limpiador');
+  $('fStep').innerHTML=(isTx?TX_STEPS:STEPS).map(s=>`<option>${s}</option>`).join('');
   if(![...$('fStep').options].some(o=>o.value===st))$('fStep').add(new Option(st));
   $('fStep').value=st;$('fName').value=p?p.name:'';$('fNote').value=p?p.note:'';
+  $('fKind').value=(p&&p.kind)||'semanal';syncKind();
   selDays=p&&p.days?[...p.days]:[];drawDays();
   fillSlots(p);
   $('fDelete').style.display=p?'inline-block':'none';
@@ -305,6 +356,14 @@ function fillSlots(p){
 }
 function syncSlot(){$('stepWrap').style.display=$('fSlot').value?'none':'block'}
 $('fSlot').onchange=syncSlot;
+// en Extras: el tipo decide si se piden días fijos
+function syncKind(){
+  const isTx=mode==='tx', weekly=$('fKind').value==='semanal';
+  $('kindWrap').style.display=isTx?'block':'none';
+  $('daysWrap').style.display=(!isTx||weekly)?'block':'none';
+  $('fDaysLbl').textContent=isTx?'Días de la semana (si no marcas ninguno, sin día fijo)':'Días (si no marcas ninguno, va todos los días)';
+}
+$('fKind').onchange=syncKind;
 function showPhoto(){$('fPrev').src=photoData||'';$('fPrev').style.display=photoData?'block':'none';$('fPhotoDel').style.display=photoData?'inline-block':'none';$('fPhotoBtn').textContent=photoData?'📷 Cambiar foto':'📷 Foto del producto'}
 function ocrMsg(t){$('ocrStatus').textContent=t}
 
@@ -345,7 +404,7 @@ async function readLabel(img){
     if(!lines.length){ocrMsg('No logré leer texto claro. Prueba con más luz y la etiqueta de frente, o escribe el nombre.');return}
     const big=[...lines].sort((a,b)=>b.h-a.h).slice(0,8);
     if(!$('fName').value.trim()){$('fName').value=big.slice(0,2).map(l=>l.t).join(' ')}
-    if(!editing){const st=guessStep(lines.map(l=>l.t).join(' '));if(st){
+    if(!editing&&mode!=='tx'){const st=guessStep(lines.map(l=>l.t).join(' '));if(st){
       if(![...$('fStep').options].some(o=>o.value===st))$('fStep').add(new Option(st));$('fStep').value=st;
       const slot=S[mode].find(x=>!x.name&&x.step===st);if(slot){$('fSlot').value=slot.id;syncSlot()}}}
     $('ocrChips').innerHTML='<div class="lbl">Toca un texto para sumarlo al nombre:</div>'+
@@ -375,6 +434,7 @@ $('fPhoto').onchange=e=>{
 };
 function saveProduct(){
   const d={step:$('fStep').value,name:$('fName').value.trim(),note:$('fNote').value.trim(),photo:photoData,days:[...selDays].sort()};
+  if(mode==='tx'){d.kind=$('fKind').value;if(d.kind==='focalizado')d.days=[]}
   const slot=!editing&&$('fSlot').value&&S[mode].find(x=>x.id===$('fSlot').value);
   if(slot){d.step=slot.step;if(!d.days.length)d.days=slot.days||[];Object.assign(slot,d)}
   else if(editing)Object.assign(editing,d);else S[mode].push({id:uid(),...d});
@@ -407,17 +467,46 @@ setInterval(()=>{
 
 // respaldo
 $('export').onclick=()=>{
+  S.lastBackup=todayKey();save();
   const b=new Blob([JSON.stringify(S)],{type:'application/json'});const a=document.createElement('a');
   a.href=URL.createObjectURL(b);a.download='ritual-respaldo-'+todayKey()+'.json';a.click();
+  bkCheck();
 };
 $('importBtn').onclick=()=>$('importFile').click();
 $('importFile').onchange=e=>{
   const f=e.target.files[0];if(!f)return;const r=new FileReader();
-  r.onload=()=>{try{const d=JSON.parse(r.result);if(!d.am||!d.pm)throw 0;S=d;S.log=S.log||{};S.reminders=S.reminders||{am:'',pm:''};save();render();toast('Respaldo cargado')}catch(err){toast('Ese archivo no es un respaldo válido')}};
+  r.onload=()=>{try{const d=JSON.parse(r.result);if(!d.am||!d.pm)throw 0;S=d;S.log=S.log||{};S.reminders=S.reminders||{am:'',pm:''};S.tx=S.tx||[];S.createdAt=S.createdAt||todayKey();save();render();bkCheck();toast('Respaldo cargado')}catch(err){toast('Ese archivo no es un respaldo válido')}};
   r.readAsText(f);e.target.value='';
 };
 
+// aviso de respaldo: si pasan BACKUP_DAYS sin descargar uno (o nunca se descargó desde que empezó a usar la app)
+const BACKUP_DAYS=30;
+const daysSince=k=>Math.round((keyToDate(todayKey())-keyToDate(k))/864e5);
+function bkCheck(){
+  const hasData=[...S.am,...S.pm,...S.tx].some(p=>p.name)||Object.keys(S.log).length>0;
+  const n=daysSince(S.lastBackup||S.createdAt);
+  const snoozed=S.bkSnooze&&daysSince(S.bkSnooze)<7;
+  const show=hasData&&n>=BACKUP_DAYS&&!snoozed;
+  $('bkBanner').classList.toggle('show',show);
+  if(show)$('bkText').textContent=S.lastBackup?`💾 Hace ${n} días que no descargas un respaldo.`:'💾 Aún no has descargado ningún respaldo de tus datos.';
+  $('bkInfo').textContent=S.lastBackup?`Último respaldo: ${keyToDate(S.lastBackup).toLocaleDateString('es-CL',{day:'numeric',month:'long'})}.`:'Aún no has descargado ningún respaldo.';
+}
+$('bkNow').onclick=()=>$('export').click();
+$('bkLater').onclick=()=>{S.bkSnooze=todayKey();save();bkCheck()};
+if(!S.createdAt){S.createdAt=todayKey();save()}
+try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}  // pide que el navegador no borre los datos solo
+
+// si la app queda abierta pasada la medianoche, parte el día nuevo con todo desmarcado
+let curDay=todayKey();
+function rollover(){
+  if(todayKey()===curDay)return;
+  curDay=todayKey();mode=(new Date().getHours()>=15)?'pm':'am';render();bkCheck();
+}
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')rollover()});
+setInterval(rollover,60000);
+
 render();
+bkCheck();
 
 // ---- Actualizaciones (estilo OTA) ----
 const APP_VERSION='1.0.0';
