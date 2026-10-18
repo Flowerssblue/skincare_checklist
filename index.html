@@ -445,15 +445,31 @@ $('fCancel').onclick=()=>$('sheet').classList.remove('open');
 $('sheet').onclick=e=>{if(e.target.id==='sheet')$('sheet').classList.remove('open')};
 $('fPhotoBtn').onclick=()=>$('fPhoto').click();
 $('fPhotoDel').onclick=()=>{photoData='';showPhoto()};
-$('fPhoto').onchange=e=>{
-  const f=e.target.files[0];if(!f)return;const r=new FileReader();
+// Abre la foto sin pasarla a texto base64 (las fotos de 50+ megapíxeles lo hacían fallar) y la reduce antes de usarla
+function loadPhoto(f){
+  return new Promise((ok,ko)=>{
+    const url=URL.createObjectURL(f),img=new Image();
+    img.onload=()=>{URL.revokeObjectURL(url);ok(img)};
+    img.onerror=()=>{URL.revokeObjectURL(url);
+      if(window.createImageBitmap)createImageBitmap(f).then(ok,ko);else ko(new Error('decode'))};
+    img.src=url;
+  });
+}
+$('fPhoto').onchange=async e=>{
+  const f=e.target.files[0];e.target.value='';if(!f)return;
   ocrMsg('Cargando foto…');$('ocrChips').innerHTML='';
-  r.onerror=()=>ocrMsg('✗ No pude abrir esa foto. Prueba con otra.');
-  r.onload=()=>{const img=new Image();img.onerror=()=>ocrMsg('✗ No pude abrir esa foto. Prueba con otra.');img.onload=()=>{
-    const s=Math.min(1,200/Math.max(img.width,img.height));const c=document.createElement('canvas');
-    c.width=img.width*s;c.height=img.height*s;c.getContext('2d').drawImage(img,0,0,c.width,c.height);
-    photoData=c.toDataURL('image/jpeg',.75);showPhoto();readLabel(img)};img.src=r.result};
-  r.readAsDataURL(f);e.target.value='';
+  try{
+    const img=await loadPhoto(f);
+    const w=img.naturalWidth||img.width,h=img.naturalHeight||img.height;
+    const draw=max=>{const s=Math.min(1,max/Math.max(w,h));const c=document.createElement('canvas');
+      c.width=Math.max(1,Math.round(w*s));c.height=Math.max(1,Math.round(h*s));c.getContext('2d').drawImage(img,0,0,c.width,c.height);return c};
+    const work=draw(1800);
+    photoData=draw(200).toDataURL('image/jpeg',.75);showPhoto();
+    readLabel(work);
+  }catch(err){
+    const mb=(f.size/1048576).toFixed(1);
+    ocrMsg('✗ No pude abrir esa foto ('+(f.type||'tipo desconocido')+', '+mb+' MB). '+(/heic|heif/i.test(f.type)?'Ese formato no lo soporta el navegador: saca la foto con la cámara normal en JPG.':'Prueba sacando la foto de nuevo o eligiendo otra.'));
+  }
 };
 function saveProduct(){
   const d={step:$('fStep').value,name:$('fName').value.trim(),note:$('fNote').value.trim(),photo:photoData,days:[...selDays].sort()};
@@ -533,7 +549,7 @@ if(/^https?:$/.test(location.protocol)&&!['localhost','127.0.0.1','[::1]'].inclu
 }
 
 // ---- Actualizaciones (estilo OTA) ----
-const APP_VERSION='1.1.0';
+const APP_VERSION='1.1.1';
 $('appVer').textContent=APP_VERSION;
 if('serviceWorker' in navigator&&location.protocol.startsWith('http')){
   let updating=false;
