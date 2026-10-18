@@ -96,11 +96,6 @@ label.f{display:block;font-size:13px;color:var(--muted);margin:10px 0 4px}
 .dot{width:9px;height:9px;border-radius:50%;background:var(--line)}
 .dot.am{background:var(--am)} .dot.pm{background:var(--pm)}
 .intro{color:var(--muted);font-size:13px;line-height:1.45;margin:0 2px 12px;display:none}
-.bk{display:none;align-items:center;gap:8px;flex-wrap:wrap;background:var(--card);border:1px solid var(--accent);border-radius:14px;padding:10px 12px;margin-bottom:14px;font-size:13px}
-.bk.show{display:flex}
-.bk span{flex:1;min-width:160px}
-.bk button{border:0;border-radius:10px;padding:8px 12px;font-size:13px;font-weight:700;background:var(--accent);color:#fff}
-.bk button.later{background:transparent;color:var(--muted);font-weight:600}
 .tag{display:inline-block;background:var(--accent-soft);color:var(--accent);border-radius:99px;padding:1px 8px;font-size:11px;font-weight:700;font-style:normal;margin-left:4px}
 </style>
 </head>
@@ -115,12 +110,6 @@ label.f{display:block;font-size:13px;color:var(--muted);margin:10px 0 4px}
     <button id="tab-am" class="on">☀️ Mañana</button>
     <button id="tab-pm">🌙 Noche</button>
     <button id="tab-tx">✨ Extras</button>
-  </div>
-
-  <div class="bk" id="bkBanner">
-    <span id="bkText"></span>
-    <button id="bkNow">Descargar</button>
-    <button id="bkLater" class="later">Luego</button>
   </div>
 
   <p class="intro" id="txIntro"><b>Tratamientos</b> de uso ocasional: mascarillas, exfoliantes, parches. Toca uno para marcar que lo usaste hoy; te digo hace cuánto fue la última vez. No cuentan para la racha.</p>
@@ -156,7 +145,7 @@ label.f{display:block;font-size:13px;color:var(--muted);margin:10px 0 4px}
 
   <div class="section">
     <h2>Respaldo</h2>
-    <p>Todo se guarda en este navegador. Si borras los datos del navegador o cambias de celular, se pierde, así que descarga un respaldo de vez en cuando. Te aviso si pasa más de un mes.</p>
+    <p>Todo se guarda en este navegador. Si borras los datos del navegador o cambias de celular, se pierde, así que descarga un respaldo de vez en cuando.</p>
     <p id="bkInfo"></p>
     <div class="row">
       <button class="btn" id="export">Descargar respaldo</button>
@@ -479,20 +468,9 @@ $('importFile').onchange=e=>{
   r.readAsText(f);e.target.value='';
 };
 
-// aviso de respaldo: si pasan BACKUP_DAYS sin descargar uno (o nunca se descargó desde que empezó a usar la app)
-const BACKUP_DAYS=30;
-const daysSince=k=>Math.round((keyToDate(todayKey())-keyToDate(k))/864e5);
 function bkCheck(){
-  const hasData=[...S.am,...S.pm,...S.tx].some(p=>p.name)||Object.keys(S.log).length>0;
-  const n=daysSince(S.lastBackup||S.createdAt);
-  const snoozed=S.bkSnooze&&daysSince(S.bkSnooze)<7;
-  const show=hasData&&n>=BACKUP_DAYS&&!snoozed;
-  $('bkBanner').classList.toggle('show',show);
-  if(show)$('bkText').textContent=S.lastBackup?`💾 Hace ${n} días que no descargas un respaldo.`:'💾 Aún no has descargado ningún respaldo de tus datos.';
   $('bkInfo').textContent=S.lastBackup?`Último respaldo: ${keyToDate(S.lastBackup).toLocaleDateString('es-CL',{day:'numeric',month:'long'})}.`:'Aún no has descargado ningún respaldo.';
 }
-$('bkNow').onclick=()=>$('export').click();
-$('bkLater').onclick=()=>{S.bkSnooze=todayKey();save();bkCheck()};
 if(!S.createdAt){S.createdAt=todayKey();save()}
 try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}  // pide que el navegador no borre los datos solo
 
